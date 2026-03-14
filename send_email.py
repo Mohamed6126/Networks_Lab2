@@ -8,10 +8,12 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-def send_mail(send_email, receiver_email, sender_pass, subject, body, filepath):
+sender_pass = "fmisqojvvkwadyvc"
+
+def send_mail(sender_email, receiver_email, sender_pass, subject, body, filepath):
     try:
         mail = MIMEMultipart()
-        mail["From"] = send_email
+        mail["From"] = sender_email
         mail["To"] = receiver_email
         mail["Subject"] = subject
 
@@ -33,20 +35,4 @@ def send_mail(send_email, receiver_email, sender_pass, subject, body, filepath):
     except Exception as e:
         print("Error sending mail, Error code: ")
         print(e)
-
-
-sender_email = input("From: ")
-receiver_email = input("To: ")
-subject = input("Subject: ")
-body = input("Message: ")
-sender_pass = "fmisqojvvkwadyvc"
-
-root = tk.Tk()
-root.withdraw() 
-filepath = filedialog.askopenfilename(
-    title="Select attachment",
-    filetypes=[("All files", "*.*")]
-)
-send_mail(sender_email, receiver_email, sender_pass, subject, body, filepath)
-
 

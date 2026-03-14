@@ -1,6 +1,9 @@
 import imaplib
 import email
 from email.header import decode_header
+import os
+import subprocess
+
 
 imap_server = "imap.gmail.com"
 email_address = "ma7amedhossam@gmail.com"
@@ -25,23 +28,37 @@ def fetch_inbox():
                 msg = email.message_from_bytes(response[1])
 
                 
-                print("From:", msg["From"])
-                print("Subject:", msg["Subject"])
-                print()
+                result = ""
+                result += "From: " + str(msg["From"]) + "\n"
+                result += "Subject: " + str(msg["Subject"]) + "\n\n"
 
-                # Extract body
+                body = ""
+                attachments = []
+
                 if msg.is_multipart():
+
                     for part in msg.walk():
-                        if part.get_content_type() == "text/plain":
+                        if part.get_content_type() == "text/plain" and part.get("Content-Disposition") is None:
                             body = part.get_payload(decode=True).decode()
-                            print("Body:\n", body)
-                            break
+                        if part.get("Content-Disposition") is not None:
+                            filename = part.get_filename()
+
+                            if filename:
+                                filepath = os.path.join("attachments", filename)
+
+                                os.makedirs("attachments", exist_ok=True)
+
+                                with open(filepath, "wb") as f:
+                                    f.write(part.get_payload(decode=True))
+                                    subprocess.Popen(["xdg-open", filepath])
+
+                                attachments.append(filename)
                 else:
                     body = msg.get_payload(decode=True).decode()
-                    print("Body:\n", body)
+                
+        result += body
         mail.logout()
+        return result
     except Exception as e:
         print("Failed to read inbox, error code: ")
         print(e)
-
-fetch_inbox()
